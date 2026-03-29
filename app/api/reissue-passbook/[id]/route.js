@@ -1,6 +1,6 @@
 // app/api/reissue-passbook/[id]/route.js
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb'; 
+import connectDB from '@/lib/mongodb';
 import ReissuePassbook from '@/lib/models/ReissuePassbook';
 
 function sanitizeBody(body) {
@@ -10,6 +10,17 @@ function sanitizeBody(body) {
     clean.apy = v === true || v === 'true' || v === 'Yes' || v === 1 || v === '1';
   }
   if ('scheme' in clean) clean.scheme = clean.scheme ?? '';
+  // resetDate: store as Date if provided, null otherwise
+  if ('resetDate' in clean) {
+    clean.resetDate = clean.resetDate ? new Date(clean.resetDate) : null;
+  }
+  // Strip resetRequired — it's frontend-only, never stored
+  if ('newPassbookRequired' in clean) {
+    const v = clean.newPassbookRequired;
+    clean.newPassbookRequired = v === true || v === 'true' || v === 1 || v === '1';
+  }
+  
+  delete clean.resetRequired;
   return clean;
 }
 
